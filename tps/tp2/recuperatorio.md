@@ -1,9 +1,9 @@
 # COMPUTACION II
 
 
-## TP2
+## RECUPERATORIO TP2
 
-Fecha de entrega: 16/06/2020
+Fecha de entrega: 24/08/2020
 
 
 ### Problema
@@ -32,8 +32,15 @@ Una vez finalizado proceso de creación del estego-mensaje deben terminar los hi
 
 Los valores de OFFSET e INTERLEAVE se proveerán con las siguientes opciones "-e pixels" o "--offset pixels" y "-i pixels"  o "--interleave pixels" respectivamente. 
 
-Finalmente se pide validar INTERLEAVE, en función del tamaño del raster del portador y el largo del mensaje esteganográfico.
+Adicionalmnete se pide validar INTERLEAVE, en función del tamaño del raster del portador y el largo del mensaje esteganográfico.
 
+Por último se debe hacer una aplicación que extraga el mensage oculto en la imagen portadora, los parámetros de OFFSET INTERLEAVE L_TOTAL los deberá sacar del encabezado.
+
+El recuperatorio agrega la posibilidad de poder cifrar el mensaje original con la opción -c o "--cifrado", utilizando para ello un hilo adicional que aplique el cifrado rot13 al texto del mensaje que se quiere ocultar, antes de aplicar esteganografía. En caso de aplicar el cifrado adicional, el encabezado se debe generar de la siguiente manera :
+
+#UMCOMPU2-C OFFSET INTERLEAVE L_TOTAL
+
+de esta manera la aplicación que extrae el mensaje sabrá si debe o no aplicar el cifrado rot13 nuevamente.
 
 ### Requerimientos
 
@@ -84,5 +91,4 @@ http://netpbm.sourceforge.net/doc/ppm.html
 https://itnext.io/steganography-101-lsb-introduction-with-python-4c4803e08041
 
 ### Bonus Track
-Realizar una aplicación que pueda extraer el mensage oculto en la imagen portadora.
 
