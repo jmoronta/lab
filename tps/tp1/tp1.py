@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+<<<<<<< HEAD
 import multiprocessing
 import os
 import argparse
@@ -98,3 +99,4 @@ if __name__ == '__main__':
     
     if os.path.exists('red.ppm') and os.path.exists('green.ppm') and os.path.exists('blue.ppm'):
         print("Archivos creados con exito")
+

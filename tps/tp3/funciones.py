@@ -5,6 +5,7 @@ import sys
 import binascii
 import fnmatch
 import re
+
 from concurrent import futures
 import array
 
@@ -96,6 +97,7 @@ def Index(path):
 		body = bytearray(html, 'utf8')
 
 		return body
+
 
 def aplicarfiltro(imagen,filtro, intensidad,size,directorio,hilos):
     try:
@@ -279,4 +281,5 @@ def cambiar_colores_bw(encabezado,lista, intensidad,directorio,imagen):
         print("El archivo no se encuentra en el directorio")
         sys.exit()        
  
+
 
