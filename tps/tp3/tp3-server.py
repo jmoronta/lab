@@ -4,13 +4,14 @@ import os
 import sys
 import argparse
 import multiprocessing
-import funciones as fc
 import socketserver
+import funciones as fc
+
 
 class servidor(socketserver.ForkingTCPServer):
     def __init__(self,server_address,RequestHandlerClass,tamano,directorio,hilos):
         socketserver.ForkingTCPServer.__init__(self,server_address,RequestHandlerClass)
-        socketserver.allow_reuse_address = True
+        socketserver.ForkingTCPServer.allow_reuse_address = True
         self.tamano = tamano
         self.directorio = directorio
         self.hilos=hilos
@@ -30,45 +31,69 @@ class Handler(socketserver.BaseRequestHandler):
             print(archivo)
             esunfiltro=archivo.find("?")
             print(esunfiltro)
-            if esunfiltro != -1 :
-                dato = archivo.find("ppm")
-                if dato > 0:
-            	    image = archivo.split('&')
-            	    name = image[0].split('=')
-            	    color = image[1].split('=')
-            	    intensity = image[2].split('=')
-            	    reading_block = image[3].split('=')
-            	    print("HERE: ", name[1], color[1], intensity[1], reading_block[1])
-
-                   # body = os.read(fd,os.path.getsize(solicitud))
-                   # os.close(fd)
-                   # header =bytearray("HTTP/1.1 200 OK\r\n Content-Type:"+extension+" \r\nContent-length:"+str(len(body))+" \r\n\r\n",'utf8')
-               # respuesta = header + body
-               # self.request.sendall(respuesta)
-            if (archivo == '/') or (archivo == '/index.html') :
-                body = fc.Index(directorio)
-                extension='html'
-                header =bytearray("HTTP/1.1 200 OK\r\n Content-Type:"+extension+" \r\nContent-length:"+str(len(body))+" \r\n\r\n",'utf8')
-                print(body)
-                respuesta = header + body
-                self.request.sendall(respuesta)
-            else: 
-                tomarextension = archivo.split('.')[1]
-                extension=fc.procesar_mimetype(tomarextension)
-                print(extension)
-                solicitud=directorio+archivo 
-                fd=fc.abrir_archivo(solicitud)
-                if os.path.isfile(fd) == False:
-                    fd2=fc.abrir_archivo(directorio+"error.html")
-                    body = os.read(fd2,tamano)
-                    #body   = "<html><head><meta<title>Mi pagina de prueba</title></head><body><p>Hola Mundo todo bien</p></body></html>"
-                    header =bytearray("HTTP/1.1 404 error\r\n Content-Type:"+extension+" \r\nContent-length:"+str(len(body))+" \r\n\r\n",'utf8')
-                if os.path.isfile(solicitud) == True:
-                    body = os.read(fd,os.path.getsize(solicitud))
-                    os.close(fd)
+            try:
+                if esunfiltro != -1 :
+                    dato = archivo.find("ppm")
+                    if dato > 0:
+                        image = archivo.split('&')
+                        name = image[0].split('=')
+                        color = image[1].split('=')
+                        intensity = image[2].split('=')
+                        intensidad = intensity[1]
+                        imagen = name[1]
+                        imagen = imagen[4:]
+                        filtro = color[1]
+                        print("HERE: ", imagen,filtro ,intensidad )
+                        estado = fc.aplicarfiltro(imagen,filtro, intensidad,tamano,directorio,hilos)
+                        #print("el estado es:", estado)
+                        if estado == 0:
+                            print("el estado es:", estado)
+                            body = "<HTML><HEAD><TITLE>Filtro de imagenes</TITLE></HEAD><BODY><P>Se aplico los filtros correctamente</P></BODY></HTML>"
+                            header =bytearray("HTTP/1.1 200 OK\r\n Content-Type:html \r\nContent-length:"+str(len(body))+" \r\n\r\n",'utf8')
+                            respuesta = header + body
+                            print(respuesta)
+                            self.request.sendall(respuesta)
+                            #sys.exit
+                        else:
+                            fd2=fc.abrir_archivo(directorio+"error.html")
+                            body = os.read(fd2,tamano)
+                            header =bytearray("HTTP/1.1 404 error\r\n Content-Type:html \r\nContent-length:"+str(len(body))+" \r\n\r\n",'utf8')
+                            respuesta = header + body
+                            self.request.sendall(respuesta)
+                    # body = os.read(fd,os.path.getsize(solicitud))
+                    # os.close(fd)
+                    # header =bytearray("HTTP/1.1 200 OK\r\n Content-Type:"+extension+" \r\nContent-length:"+str(len(body))+" \r\n\r\n",'utf8')
+                # respuesta = header + body
+                # self.request.sendall(respuesta)
+                elif (archivo == '/') or (archivo == '/index.html') :
+                    body = fc.Index(directorio)
+                    extension='html'
                     header =bytearray("HTTP/1.1 200 OK\r\n Content-Type:"+extension+" \r\nContent-length:"+str(len(body))+" \r\n\r\n",'utf8')
+                    print(body)
+                    respuesta = header + body
+                    self.request.sendall(respuesta)
+                else: 
+                    tomarextension = archivo.split('.')[1]
+                    extension=fc.procesar_mimetype(tomarextension)
+                    print(extension)
+                    solicitud=directorio+archivo 
+                    fd=fc.abrir_archivo(solicitud)
+                    if os.path.isfile(fd) == False:
+                        fd2=fc.abrir_archivo(directorio+"error.html")
+                        body = os.read(fd2,tamano)
+                        header =bytearray("HTTP/1.1 404 error\r\n Content-Type:"+extension+" \r\nContent-length:"+str(len(body))+" \r\n\r\n",'utf8')
+                    if os.path.isfile(solicitud) == True:
+                        body = os.read(fd,os.path.getsize(solicitud))
+                        os.close(fd)
+                        header =bytearray("HTTP/1.1 200 OK\r\n Content-Type:"+extension+" \r\nContent-length:"+str(len(body))+" \r\n\r\n",'utf8')
+                    respuesta = header + body
+                    self.request.sendall(respuesta)
+            except:
+                fd3=fc.abrir_archivo(directorio+"error.html")
+                body = os.read(fd3,tamano) 
+                header =bytearray("HTTP/1.1 404 error\r\n Content-Type:html \r\nContent-length:"+str(len(body))+" \r\n\r\n",'utf8')
                 respuesta = header + body
-                self.request.sendall(respuesta)
+                self.request.sendall(respuesta)  
 
 if __name__ == "__main__":
     HOST="0.0.0.0"
