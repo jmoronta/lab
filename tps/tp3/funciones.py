@@ -144,7 +144,7 @@ def aplicarfiltro(imagen,filtro, intensidad,size,directorio,hilos):
             cuerpo = leido
             encabezado = ""    
         #print("cuerpo es ",len(cuerpo))
-        thread = futures.ThreadPoolExecutor(max_workers=1)
+        thread = futures.ThreadPoolExecutor()
         #leido = os.read(archivo, size)
         if filtro == 'R' :
             thread.submit(cambiar_colores_red,encabezado,cuerpo,intensidad,directorio,imagen)
@@ -155,7 +155,7 @@ def aplicarfiltro(imagen,filtro, intensidad,size,directorio,hilos):
         elif filtro == 'G' :
             thread.submit(cambiar_colores_green,encabezado,cuerpo,intensidad,directorio,imagen)
 
-        elif filtro == 'BW' :
+        elif filtro == 'W' :
             thread.submit(cambiar_colores_bw,encabezado,cuerpo,intensidad,directorio,imagen)
 
         else: 
@@ -272,6 +272,9 @@ def cambiar_colores_bw(encabezado,lista, intensidad,directorio,imagen):
     image_bw = array.array('B', imagebw)
     try:
         with open(directorio + imagen+'-black&white.ppm', 'ab') as f:
+            print(encabezado)
+            print(directorio)
+            print(imagen)
             if encabezado != "":
                 f.write(bytearray(encabezado, 'ascii'))
                 print("aca esta:",encabezado)
