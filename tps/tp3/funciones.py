@@ -154,6 +154,67 @@ def aplicarfiltro(imagen,filtro, intensidad,size,directorio,hilos):
     except FileNotFoundError:
         print(_ERROR_ARCHIVO)
         sys.exit()
+<<<<<<< HEAD
+=======
+    if size % 3 != 0: #VEO si es multiplo de 3
+        size += (3 - (size % 3))
+    leido = os.read(archivo, size)
+    estado = 0
+    calcularencabezado=True 
+    #thread = futures.ThreadPoolExecutor(max_workers=20)
+    while leido:
+        if calcularencabezado == True:
+            dimen = False
+            # sacar comentario
+            i = 0
+            if i == 0:
+                for i in range(leido.count(b"\n# ")):
+                    barra_n_as = leido.find(b"\n# ")
+                    barra_n = leido.find(b"\n", barra_n_as + 1)
+                    leido = leido.replace(leido[barra_n_as:barra_n], b"")
+            # sacar encabezado
+            inicio = leido.find(b"\n") + 1
+            medio = leido.find(b"\n", inicio) + 1
+            final = leido.find(b"\n", medio) + 1
+            encabezado = leido[:final].decode()
+            
+            # saco ancho y largo
+            linea = leido.splitlines()
+            for i in range(len(linea)):
+                if dimen == False:
+                    word = linea[i].split()
+                    if len(word) == 2:
+                        width = int(word[0])
+                        height = int(word[1])
+                        dimen = True
+            lista2 = []
+            calcularencabezado = False
+            # guardo el cuerpo
+            cuerpo = leido[final:]
+        else:
+            cuerpo = leido
+            encabezado = ""    
+        #print("cuerpo es ",len(cuerpo))
+        thread = futures.ThreadPoolExecutor()
+        #leido = os.read(archivo, size)
+        if filtro == 'R' :
+            thread.submit(cambiar_colores_red,encabezado,cuerpo,intensidad,directorio,imagen)
+            
+        elif filtro == 'B' :
+            thread.submit(cambiar_colores_blue,encabezado,cuerpo,intensidad,directorio,imagen)
+            
+        elif filtro == 'G' :
+            thread.submit(cambiar_colores_green,encabezado,cuerpo,intensidad,directorio,imagen)
+
+        elif filtro == 'W' :
+            thread.submit(cambiar_colores_bw,encabezado,cuerpo,intensidad,directorio,imagen)
+
+        else: 
+            print("No se pudo aplicar el filtro")
+            estado = 1
+        leido = os.read(archivo, size)
+                    
+>>>>>>> f4a3bd046448f872ad360084ce8df6a8f9b4a779
     return estado
 
 def cambiar_colores_red(cuerpo2, intensidad):
@@ -222,4 +283,23 @@ def cambiar_colores_bw(lista, intensidad):
             prom = 0
             i = 0
     image_bw = array.array('B', imagebw)
+<<<<<<< HEAD
     return image_bw       
+=======
+    try:
+        with open(directorio + imagen+'-black&white.ppm', 'ab') as f:
+            print(encabezado)
+            print(directorio)
+            print(imagen)
+            if encabezado != "":
+                f.write(bytearray(encabezado, 'ascii'))
+                print("aca esta:",encabezado)
+            image_bw.tofile(f)
+            os.close(f)
+    except FileNotFoundError:
+        print("El archivo no se encuentra en el directorio")
+        sys.exit()        
+ 
+
+
+>>>>>>> f4a3bd046448f872ad360084ce8df6a8f9b4a779
