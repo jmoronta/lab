@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-<<<<<<< HEAD
 import multiprocessing
 import os
 import argparse

@@ -10,8 +10,8 @@ import funciones as fc
 
 class servidor(socketserver.ForkingTCPServer):
     def __init__(self,server_address,RequestHandlerClass,tamano,directorio,hilos):
-        socketserver.ForkingTCPServer.__init__(self,server_address,RequestHandlerClass)
         socketserver.ForkingTCPServer.allow_reuse_address = True
+        socketserver.ForkingTCPServer.__init__(self,server_address,RequestHandlerClass)
         self.tamano = tamano
         self.directorio = directorio
         self.hilos=hilos
@@ -45,30 +45,26 @@ class Handler(socketserver.BaseRequestHandler):
                         filtro = color[1]
                         print("HERE: ", imagen,filtro ,intensidad )
                         estado = fc.aplicarfiltro(imagen,filtro, intensidad,tamano,directorio,hilos)
-                        #print("el estado es:", estado)
+                        
                         if estado == 0:
-                            print("el estado es:", estado)
-                            body = "<HTML><HEAD><TITLE>Filtro de imagenes</TITLE></HEAD><BODY><P>Se aplico los filtros correctamente</P></BODY></HTML>"
+                            
+                            #TODO: debe haber solo una pagina de exito en la raiz, no en cada uno de las rutas
+                            fd2=fc.abrir_archivo(directorio+"exito.html")
+                            body = os.read(fd2,tamano)                            
                             header =bytearray("HTTP/1.1 200 OK\r\n Content-Type:html \r\nContent-length:"+str(len(body))+" \r\n\r\n",'utf8')
-                            respuesta = header + body
-                            print(respuesta)
-                            self.request.sendall(respuesta)
-                            #sys.exit
+                            
                         else:
+                            #TODO: debe haber solo una pagina de error en la raiz, no en cada uno de las rutas
                             fd2=fc.abrir_archivo(directorio+"error.html")
                             body = os.read(fd2,tamano)
                             header =bytearray("HTTP/1.1 404 error\r\n Content-Type:html \r\nContent-length:"+str(len(body))+" \r\n\r\n",'utf8')
-                            respuesta = header + body
-                            self.request.sendall(respuesta)
-                    # body = os.read(fd,os.path.getsize(solicitud))
-                    # os.close(fd)
-                    # header =bytearray("HTTP/1.1 200 OK\r\n Content-Type:"+extension+" \r\nContent-length:"+str(len(body))+" \r\n\r\n",'utf8')
-                # respuesta = header + body
-                # self.request.sendall(respuesta)
+                        respuesta = header + body
+                        self.request.sendall(respuesta)
+                   
                 elif (archivo == '/') or (archivo == '/index.html') :
-                    body = fc.Index(directorio)
-                    extension='html'
-                    header =bytearray("HTTP/1.1 200 OK\r\n Content-Type:"+extension+" \r\nContent-length:"+str(len(body))+" \r\n\r\n",'utf8')
+                    
+                    body = fc.index(directorio)
+                    header =bytearray("HTTP/1.1 200 OK\r\n Content-Type: html \r\nContent-length:"+str(len(body))+" \r\n\r\n",'utf8')
                     print(body)
                     respuesta = header + body
                     self.request.sendall(respuesta)
@@ -88,8 +84,9 @@ class Handler(socketserver.BaseRequestHandler):
                         header =bytearray("HTTP/1.1 200 OK\r\n Content-Type:"+extension+" \r\nContent-length:"+str(len(body))+" \r\n\r\n",'utf8')
                     respuesta = header + body
                     self.request.sendall(respuesta)
-            except:
-                fd3=fc.abrir_archivo(directorio+"error.html")
+            except(Exception):
+                
+                fd3=fc.abrir_archivo("error.html")
                 body = os.read(fd3,tamano) 
                 header =bytearray("HTTP/1.1 404 error\r\n Content-Type:html \r\nContent-length:"+str(len(body))+" \r\n\r\n",'utf8')
                 respuesta = header + body
